@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Form Đăng ký Giải chạy + Google Sheets</title>
+<style>
+/* (giữ nguyên style của bạn) */
+body{font-family:Arial,Helvetica,sans-serif;background:#f5f7fa;padding:20px}
+.container{max-width:820px;margin:20px auto;background:#fff;padding:22px;border-radius:10px;box-shadow:0 6px 24px rgba(20,20,20,0.08)}
+h1{color:#2d014d;text-align:center}
+.stepper{display:flex;gap:12px;justify-content:center;margin:18px 0}
+.dot{width:36px;height:36px;border-radius:50%;background:#ddd;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold}
+.dot.active{background:#5a2ca0}
+form{margin-top:10px}
+.row{display:flex;gap:12px}
+.col{flex:1}
+label{display:block;font-weight:600;margin:10px 0 6px}
+input[type="text"],input[type="email"],input[type="tel"],input[type="date"],input[type="number"],select,textarea{
+  width:100%;padding:10px;border:1px solid #cfcfcf;border-radius:6px;font-size:14px;
+}
+textarea{min-height:80px;resize:vertical}
+.actions{display:flex;gap:12px;justify-content:space-between;margin-top:18px}
+button{background:#5a2ca0;color:#fff;padding:12px 18px;border:none;border-radius:8px;cursor:pointer;font-weight:700}
+button.secondary{background:#fff;color:#5a2ca0;border:2px solid #5a2ca0}
+.msg{margin-top:12px;font-weight:600}
+.error{color:#c62828}
+.success{color:#2e7d32}
+.summary{background:#f9f9fb;padding:12px;border-radius:8px;margin-top:12px;border:1px solid #eee}
+@media(max-width:720px){ .row{flex-direction:column} }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Đăng ký Giải chạy</h1>
+
+  <div class="stepper">
+    <div id="dot1" class="dot active">1</div>
+    <div id="dot2" class="dot">2</div>
+    <div id="dot3" class="dot">3</div>
+    <div id="dot4" class="dot">4</div>
+  </div>
+
+  <form id="multiForm" onsubmit="return false;">
+    <!-- STEP 1 -->
+    <div id="step1">
+      <h3>Bước 1 — Thông tin cá nhân & y tế</h3>
+      <label>Họ và tên *</label>
+      <input type="text" id="fullname" placeholder="Nguyễn Văn A">
+
+      <div class="row">
+        <div class="col">
+          <label>Ngày sinh *</label>
+          <input type="date" id="dob">
+        </div>
+        <div class="col">
+          <label>Giới tính *</label>
+          <select id="gender">
+            <option value="">-- Chọn --</option>
+            <option>Nam</option>
+            <option>Nữ</option>
+            <option>Khác</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label>Quốc tịch *</label>
+          <select id="nationality">
+            <option value="">-- Chọn quốc tịch --</option>
+            <option value="Việt Nam">Việt Nam</option>
+            <option value="Mỹ">Mỹ</option>
+            <option value="Anh">Anh</option>
+            <option value="Pháp">Pháp</option>
+            <option value="Nhật Bản">Nhật Bản</option>
+            <option value="Hàn Quốc">Hàn Quốc</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+
+        <div class="col">
+          <label>Tỉnh / Thành phố *</label>
+          <select id="city">
+            <option value="">-- Chọn tỉnh/thành phố --</option>
+            <option value="Hà Nội">Hà Nội</option>
+            <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+            <option value="Đà Nẵng">Đà Nẵng</option>
+            <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
+            <option value="Hải Phòng">Hải Phòng</option>
+            <option value="Cần Thơ">Cần Thơ</option>
+            <option value="Quảng Ninh">Quảng Ninh</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col">
+          <label>Tuổi</label>
+          <input type="number" id="age" min="0" placeholder="25">
+        </div>
+        <div class="col">
+          <label>Nhóm máu</label>
+          <select id="blood">
+            <option value="">-- Chọn --</option>
+            <option>A</option><option>B</option><option>AB</option><option>O</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Người bảo hộ (nếu có)</label>
+      <input type="text" id="guardian" placeholder="Họ tên người bảo hộ">
+
+      <div class="actions">
+        <div></div>
+        <button type="button" id="toStep2">Tiếp tục →</button>
+      </div>
+      <div id="msg1" class="msg error" style="display:none"></div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" style="display:none">
+      <h3>Bước 2 — Thông tin đăng ký</h3>
+      <label>Họ và tên (dùng cho đăng ký) *</label>
+      <input type="text" id="reg_name" placeholder="Nguyễn Văn A">
+      <label>Email *</label>
+      <input type="email" id="reg_email" placeholder="email@example.com">
+      <label>Số điện thoại *</label>
+      <input type="tel" id="reg_phone" placeholder="09xxxxxxxx">
+
+      <div class="actions">
+        <button type="button" class="secondary" id="backTo1">← Quay lại</button>
+        <button type="button" id="toStep3">Tiếp tục →</button>
+      </div>
+      <div id="msg2" class="msg error" style="display:none"></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" style="display:none">
+      <h3>Bước 3 — Thanh toán</h3>
+      <div class="summary">
+        <p><b>Sản phẩm:</b> Gói tham gia 10KM - REGULAR</p>
+        <p><b>Giá:</b> ₫880,000</p>
+      </div>
+      <label>Phương thức thanh toán *</label>
+      <select id="payment_method">
+        <option value="">-- Chọn --</option>
+        <option>Visa / MasterCard</option>
+        <option>Chuyển khoản ngân hàng</option>
+        <option>Momo</option>
+        <option>ZaloPay</option>
+      </select>
+      <label>Thông tin thẻ/tài khoản (nếu có)</label>
+      <input type="text" id="card_info" placeholder="Số thẻ hoặc TK (nếu cần)">
+      <label>Mã voucher (nếu có)</label>
+      <input type="text" id="voucher" placeholder="GIAM10">
+
+      <div class="actions">
+        <button type="button" class="secondary" id="backTo2">← Quay lại</button>
+        <button type="button" id="submitBtn">Đặt hàng</button>
+      </div>
+      <div id="msg3" class="msg error" style="display:none"></div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div id="step4" style="display:none">
+      <h3>🎉 Thanh toán thành công</h3>
+      <div class="summary">
+        <p><b>Mã đơn hàng:</b> <span id="orderId"></span></p>
+        <p><b>Email:</b> <span id="confirmEmail"></span></p>
+        <p><b>Số điện thoại:</b> <span id="confirmPhone"></span></p>
+        <p><b>Sản phẩm:</b> Gói tham gia 10KM - REGULAR</p>
+        <p><b>Giá:</b> ₫880,000</p>
+        <p><b>Trạng thái:</b> <span id="orderStatus" style="color:green">Đã thanh toán</span></p>
+      </div>
+      <div style="margin-top:20px; text-align:center">
+        <button id="downloadBtn">⬇️ Tải vé</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+/* ==== Thay bằng link Web App đã deploy của bạn ==== */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz3PRp9i2UZUbgtScfrPO0rv3fWqABDH3iWQAKlqCVMALver2n3-afFOS4AUvW0b3go/exec";
+
+/* Buttons */
+const toStep2 = document.getElementById('toStep2');
+const toStep3 = document.getElementById('toStep3');
+const backTo1 = document.getElementById('backTo1');
+const backTo2 = document.getElementById('backTo2');
+const submitBtn = document.getElementById('submitBtn');
+
+function showStep(n){
+  document.getElementById('step1').style.display = (n===1?'block':'none');
+  document.getElementById('step2').style.display = (n===2?'block':'none');
+  document.getElementById('step3').style.display = (n===3?'block':'none');
+  document.getElementById('step4').style.display = (n===4?'block':'none');
+  document.getElementById('dot1').classList.toggle('active', n===1);
+  document.getElementById('dot2').classList.toggle('active', n===2);
+  document.getElementById('dot3').classList.toggle('active', n===3);
+  document.getElementById('dot4').classList.toggle('active', n===4);
+}
+
+/* bước 1 -> 2 */
+toStep2.addEventListener('click', ()=>{
+  const fullname = document.getElementById('fullname').value.trim();
+  const dob = document.getElementById('dob').value;
+  const gender = document.getElementById('gender').value;
+  const msg1 = document.getElementById('msg1');
+  msg1.style.display = 'none';
+  if(!fullname || !dob || !gender){
+    msg1.textContent = "Vui lòng nhập Họ tên, Ngày sinh và Giới tính.";
+    msg1.style.display = 'block';
+    return;
+  }
+  showStep(2);
+});
+backTo1.addEventListener('click', ()=> showStep(1));
+
+/* bước 2 -> 3 */
+toStep3.addEventListener('click', ()=>{
+  const name = document.getElementById('reg_name').value.trim();
+  const email = document.getElementById('reg_email').value.trim();
+  const phone = document.getElementById('reg_phone').value.trim();
+  const msg2 = document.getElementById('msg2');
+  msg2.style.display = 'none';
+  if(!name || !email || !phone){
+    msg2.textContent = "Vui lòng nhập Họ tên (đăng ký), Email và Số điện thoại.";
+    msg2.style.display = 'block';
+    return;
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    msg2.textContent = "Email không hợp lệ.";
+    msg2.style.display = 'block';
+    return;
+  }
+  if(!/^[0-9\+\-\s]{7,15}$/.test(phone)){
+    msg2.textContent = "Số điện thoại không hợp lệ.";
+    msg2.style.display = 'block';
+    return;
+  }
+  showStep(3);
+});
+backTo2.addEventListener('click', ()=> showStep(2));
+
+/* submit -> gửi lên GAS */
+submitBtn.addEventListener('click', async ()=> {
+  const payment = document.getElementById('payment_method').value;
+  const card = document.getElementById('card_info').value.trim();
+  const voucher = document.getElementById('voucher').value.trim();
+  const msg3 = document.getElementById('msg3');
+  msg3.style.display = 'none';
+
+  if(!payment){
+    msg3.textContent = "Vui lòng chọn phương thức thanh toán.";
+    msg3.style.display = 'block';
+    return;
+  }
+
+  const payload = {
+    fullname: document.getElementById('fullname').value.trim(),
+    dob: document.getElementById('dob').value,
+    gender: document.getElementById('gender').value,
+    nationality: document.getElementById('nationality').value,
+    city: document.getElementById('city').value,
+    age: document.getElementById('age').value,
+    blood: document.getElementById('blood').value,
+    guardian: document.getElementById('guardian').value.trim(),
+    reg_name: document.getElementById('reg_name').value.trim(),
+    reg_email: document.getElementById('reg_email').value.trim(),
+    reg_phone: document.getElementById('reg_phone').value.trim(),
+    payment_method: payment,
+    card_info: card,
+    voucher: voucher,
+    status: "Đã thanh toán"   // ✅ thêm trạng thái
+  };
+
+  // disable nút để tránh gửi nhiều lần
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = 0.6;
+
+  try {
+    console.log("Gửi payload tới GAS:", payload);
+
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'cors',
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    console.log("HTTP status:", res.status, "response text:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch(e){
+      throw new Error("Server trả về không phải JSON: " + text);
+    }
+
+    if(res.ok && data.status === 'success'){
+      const orderId = "EE" + Math.random().toString(36).substr(2,5).toUpperCase();
+      document.getElementById('orderId').textContent = orderId;
+      document.getElementById('confirmEmail').textContent = payload.reg_email;
+      document.getElementById('confirmPhone').textContent = payload.reg_phone;
+      document.getElementById('orderStatus').textContent = payload.status;
+      showStep(4);
+    } else {
+      throw new Error("Server trả về lỗi: " + (data.message || JSON.stringify(data)));
+    }
+  } catch(err){
+    console.error("Lỗi gửi tới GAS:", err);
+    msg3.textContent = "Lỗi mạng hoặc CORS: " + err.message;
+    msg3.style.display = 'block';
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = 1;
+  }
+});
+
+/* Tải vé (file TXT đơn giản) */
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const content = `
+Vé tham gia giải chạy Huế Heritage Trail
+----------------------------
+Mã đơn: ${document.getElementById('orderId').textContent}
+Email: ${document.getElementById('confirmEmail').textContent}
+SĐT: ${document.getElementById('confirmPhone').textContent}
+Sản phẩm: 10KM - REGULAR
+Giá: ₫880,000
+Trạng thái: ${document.getElementById('orderStatus').textContent}
+  `;
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "ve_tham_gia.txt";
+  link.click();
+});
+
+showStep(1);
+</script>
+</body>
+</html>
