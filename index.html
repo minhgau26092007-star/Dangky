@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng ký Huế Heritage Trail 2025</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fa;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 750px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .step { display: none; }
+    .step.active { display: block; }
+    .form-group { margin-bottom: 15px; }
+    label { font-weight: bold; display: block; margin-bottom: 6px; }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    .btn {
+      background: #7b2ff7;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn.back { background: #aaa; }
+    .btn.home { background: #27ae60; }
+    .error { color: red; font-size: 14px; margin-top: 4px; }
+
+    /* Vé điện tử */
+    .ticket {
+      width: 360px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      text-align: center;
+      line-height: 1.6;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transform: scale(0.95);
+      transform-origin: top center;
+    }
+    .ticket img.banner {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .ticket h3 { margin: 6px 0; color: #7b2ff7; }
+    .ticket .highlight { color: #f39c12; font-weight: bold; }
+    .ticket p { margin: 4px 0; font-size: 14px; }
+    #qrcode { display: flex; justify-content: center; margin-top: 10px; }
+    .footer { margin-top: 10px; font-size: 12px; color: #555; }
+    .payment-qr {
+      width: 180px;
+      height: 180px;
+      border: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <form id="regForm" onsubmit="return false">
+
+    <!-- Bước 1 -->
+    <div id="step1" class="step active">
+      <h2>🎫 Chọn loại vé</h2>
+      <div class="form-group">
+        <label>Loại vé</label>
+        <select id="ticket">
+          <option value="5km - 200000">5KM - 200,000đ</option>
+          <option value="10km - 300000">10KM - 300,000đ</option>
+          <option value="21km - 500000">21KM - 500,000đ</option>
+        </select>
+      </div>
+      <button type="button" class="btn" onclick="nextStep(2)">Tiếp tục</button>
+    </div>
+
+    <!-- Bước 2 -->
+    <div id="step2" class="step">
+      <h2>👤 Thông tin cá nhân</h2>
+      <div class="form-group"><label>Họ và tên</label><input type="text" id="fullname"></div>
+      <div class="form-group"><label>Giới tính</label>
+        <select id="gender">
+          <option>Nam</option><option>Nữ</option><option>Khác</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+      <div class="form-group"><label>Số điện thoại</label><input type="text" id="phone"></div>
+      <div class="form-group"><label>Điện thoại khẩn cấp</label><input type="text" id="emergencyPhone"></div>
+
+      <div class="form-group">
+        <label>Quốc gia</label>
+        <select id="country">
+          <option>Việt Nam</option>
+          <option>Thái Lan</option>
+          <option>Singapore</option>
+          <option>Malaysia</option>
+          <option>Nhật Bản</option>
+          <option>Hàn Quốc</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Quốc tịch</label>
+        <select id="nationality">
+          <option>Việt Nam</option>
+          <option>Thái Lan</option>
+          <option>Singapore</option>
+          <option>Malaysia</option>
+          <option>Nhật Bản</option>
+          <option>Hàn Quốc</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Tỉnh/Thành phố</label>
+        <select id="city">
+          <option>Hà Nội</option>
+          <option>Huế</option>
+          <option>Đà Nẵng</option>
+          <option>TP. Hồ Chí Minh</option>
+          <option>Hải Phòng</option>
+          <option>Cần Thơ</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label><input type="checkbox" id="ageConfirm"> Tôi xác nhận đã đủ 18 tuổi.</label>
+        <div id="ageError" class="error" style="display:none;">⚠️ Bạn phải xác nhận đã đủ 18 tuổi!</div>
+      </div>
+      <button type="button" class="btn back" onclick="nextStep(1)">Quay lại</button>
+      <button type="button" class="btn" onclick="validateAgeAndContinue()">Tiếp tục</button>
+    </div>
+
+    <!-- Bước 3 -->
+    <div id="step3" class="step">
+      <h2>💉 Thông tin y tế</h2>
+      <div class="form-group">
+        <label>Nhóm máu</label>
+        <select id="bloodType">
+          <option>A</option><option>B</option><option>AB</option><option>O</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Bệnh lý (nếu có)</label><input type="text" id="disease"></div>
+      <div class="form-group"><label>Dị ứng (nếu có)</label><input type="text" id="allergy"></div>
+      <div class="form-group"><label>Thuốc đang sử dụng</label><input type="text" id="medicine"></div>
+      <button type="button" class="btn back" onclick="nextStep(2)">Quay lại</button>
+      <button type="button" class="btn" onclick="nextStep(4);updatePaymentQR();">Tiếp tục</button>
+    </div>
+
+    <!-- Bước 4 -->
+    <div id="step4" class="step">
+      <h2>💰 Thanh toán</h2>
+      <div class="form-group">
+        <label>Phương thức thanh toán</label>
+        <select id="paymentMethod">
+          <option value="Banking">Chuyển khoản ngân hàng</option>
+          <option value="Momo">Momo</option>
+        </select>
+      </div>
+      <div id="paymentArea">
+        <div class="payment-qr" id="paymentQR">[QR hiển thị tại đây]</div>
+      </div>
+      <button type="button" class="btn back" onclick="nextStep(3)">Quay lại</button>
+      <button type="button" class="btn" onclick="confirmPayment()">Xác nhận thanh toán</button>
+    </div>
+
+    <!-- Bước 5 -->
+    <div id="step5" class="step">
+      <h2>🎟 Vé điện tử của bạn</h2>
+      <div class="ticket" id="ticketCard">
+        <img src="hinhanh/hinhbaner.jpg" class="banner">
+        <p><b>Ngày tổ chức:</b> 02/11/2025</p>
+        <p><b>Địa điểm:</b> Nghênh Lương Đình, Huế</p>
+        <h3 class="highlight">THẺ NHẬN RACEKIT - 01/11/2025</h3>
+        <h3>Huế Heritage Trail 2025</h3>
+        <p><b>Vận động viên:</b> <span id="pv_fullname"></span></p>
+        <p><b>Email:</b> <span id="pv_email"></span></p>
+        <p><b>Loại vé:</b> <span id="pv_ticket"></span></p>
+        <p><b>Giá:</b> <span id="pv_price"></span></p>
+        <p><b>Mã vé:</b> <span id="pv_order"></span></p>
+        <div id="qrcode"></div>
+        <div class="footer">HUẾ HERITAGE TRAIL 2025</div>
+      </div>
+      <br>
+      <button type="button" class="btn home" onclick="resetForm()">🏠 Trang chủ</button>
+      <button type="button" class="btn" onclick="sendTicketToEmail()">📧 Gửi vé qua Email</button>
+      <button type="button" class="btn" onclick="downloadTicketPDF()">💾 Tải vé PDF</button>
+    </div>
+  </form>
+</div>
+
+<!-- JS thư viện -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxeFibkXXo8J2gWWptZ17luN5in9JdgSpCX3L6r2ry9OsPwdvg8idwUca4x7o3BLj-Rcg/exec";
+
+function nextStep(s) {
+  document.querySelectorAll(".step").forEach(el => el.classList.remove("active"));
+  document.getElementById("step" + s).classList.add("active");
+}
+
+function validateAgeAndContinue() {
+  const name = fullname.value.trim(), mail = email.value.trim();
+  if (!name || !mail) { alert("⚠️ Nhập họ tên và email!"); return; }
+  if (!ageConfirm.checked) { ageError.style.display = "block"; return; }
+  ageError.style.display = "none";
+  nextStep(3);
+}
+
+function updatePaymentQR() {
+  const method = paymentMethod.value;
+  const qr = document.getElementById("paymentQR");
+  const price = ticket.value.split("-")[1].trim().replace("đ", "");
+  qr.innerHTML = method === "Banking"
+    ? `<img src="https://img.vietqr.io/image/MB-0336446817-compact.png?amount=${price}&addInfo=HHT2025" style="width:180px;">`
+    : `<img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" style="width:180px;"><p>Quét mã Momo để thanh toán ${price}đ</p>`;
+}
+
+function confirmPayment() {
+  generateTicket();
+  const data = new URLSearchParams();
+  data.append("fullname", fullname.value);
+  data.append("email", email.value);
+  data.append("phone", phone.value);
+  data.append("country", country.value);
+  data.append("nationality", nationality.value);
+  data.append("city", city.value);
+  data.append("bloodType", bloodType.value);
+  data.append("disease", disease.value);
+  data.append("allergy", allergy.value);
+  data.append("medicine", medicine.value);
+  data.append("ticket", ticket.value.split("-")[0].trim());
+  data.append("price", ticket.value.split("-")[1].trim());
+  data.append("orderId", pv_order.innerText);
+  data.append("paymentMethod", paymentMethod.value);
+  data.append("time", new Date().toLocaleString("vi-VN"));
+  fetch(GAS_URL, { method: "POST", body: data })
+    .then(r => r.text())
+    .then(t => console.log("✅ Đã gửi lên Google Sheets:", t))
+    .catch(e => console.error("❌ Lỗi gửi:", e));
+}
+
+function generateTicket() {
+  const [type, price] = ticket.value.split("-");
+  const orderId = "HHT2025" + Math.floor(Math.random() * 9000 + 1000);
+  pv_fullname.innerText = fullname.value;
+  pv_email.innerText = email.value;
+  pv_ticket.innerText = type.trim();
+  pv_price.innerText = price.trim() + "đ";
+  pv_order.innerText = orderId;
+  qrcode.innerHTML = "";
+  new QRCode(qrcode, { text: orderId, width: 150, height: 150 });
+  nextStep(5);
+}
+
+async function sendTicketToEmail() {
+  const emailVal = email.value.trim();
+  if (!emailVal) return alert("⚠️ Nhập email trước!");
+  const pdfBase64 = await generatePDFBase64();
+  const params = new URLSearchParams();
+  params.append("action", "saveAndMail");
+  params.append("email", emailVal);
+  params.append("fileName", "Ve_HHT2025.pdf");
+  params.append("pdfBase64", pdfBase64);
+  fetch(GAS_URL, { method: "POST", body: params })
+    .then(() => alert("✅ Vé đã gửi tới: " + emailVal))
+    .catch(() => alert("❌ Gửi email lỗi!"));
+}
+
+function downloadTicketPDF() {
+  const { jsPDF } = window.jspdf;
+  html2canvas(ticketCard, { scale: 2 }).then(canvas => {
+    const img = canvas.toDataURL("image/png");
+    const pdf = new jsPDF("p", "pt", "a4");
+    const w = pdf.internal.pageSize.getWidth();
+    const iw = w * 0.6;
+    const ih = canvas.height * iw / canvas.width;
+    const x = (w - iw) / 2, y = 100;
+    pdf.addImage(img, "PNG", x, y, iw, ih);
+    pdf.save("Ve_HueHeritageTrail.pdf");
+  });
+}
+
+function generatePDFBase64() {
+  return new Promise(resolve => {
+    const { jsPDF } = window.jspdf;
+    html2canvas(ticketCard, { scale: 2 }).then(canvas => {
+      const pdf = new jsPDF("p", "pt", "a4");
+      const img = canvas.toDataURL("image/png");
+      const w = pdf.internal.pageSize.getWidth();
+      const iw = w * 0.6;
+      const ih = canvas.height * iw / canvas.width;
+      const x = (w - iw) / 2, y = 100;
+      pdf.addImage(img, "PNG", x, y, iw, ih);
+      const base64 = btoa(
+        new Uint8Array(pdf.output("arraybuffer")).reduce((d, b) => d + String.fromCharCode(b), "")
+      );
+      resolve(base64);
+    });
+  });
+}
+
+function resetForm() {
+  regForm.reset();
+  nextStep(1);
+}
+</script>
+</body>
+</html>
